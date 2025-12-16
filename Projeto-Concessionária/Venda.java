@@ -14,13 +14,15 @@ import model.Cliente;
  * @author hiago
  */
 public class Venda{
+    private int id;
     private String data;
     private double valor;
     private Cliente cliente;
     private Funcionario funcionario;
     private Veiculo veiculo;
 
-    public Venda(String data, double valor, Cliente cliente, Funcionario funcionario, Veiculo veiculo) {
+    public Venda(int id, String data, double valor, Cliente cliente, Funcionario funcionario, Veiculo veiculo) {
+        this.id = id;
         this.data = data;
         this.valor = valor;
         this.cliente = cliente;
@@ -28,6 +30,14 @@ public class Venda{
         this.veiculo = veiculo;
     }
 
+    public int getId(){
+        return id;
+    }
+    
+    public void setId(int id){
+        this.id = id;
+    }
+    
     public String getData() {
         return data;
     }

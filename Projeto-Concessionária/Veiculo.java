@@ -9,6 +9,7 @@ package model;
  * @author hiago
  */
 public class Veiculo {
+    private int id;
     private String nome;
     private String cor;
     private int numMarchas;
@@ -16,7 +17,8 @@ public class Veiculo {
     private String marca;
     private String anoFabricacao;
 
-    public Veiculo(String nome, String cor, int numMarchas, int numPortas, String marca, String anoFabricacao) {
+    public Veiculo(int id, String nome, String cor, int numMarchas, int numPortas, String marca, String anoFabricacao) {
+        this.id = id;
         this.nome = nome;
         this.cor = cor;
         this.numMarchas = numMarchas;
@@ -25,6 +27,14 @@ public class Veiculo {
         this.anoFabricacao = anoFabricacao;
     }
 
+    public int getId(){
+        return id;
+    }
+    
+    public void setId(int id){
+        this.id = id;
+    }
+    
     public String getNome() {
         return nome;
     }

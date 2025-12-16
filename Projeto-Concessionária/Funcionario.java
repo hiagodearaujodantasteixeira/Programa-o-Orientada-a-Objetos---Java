@@ -21,7 +21,7 @@ public class Funcionario extends Pessoa {
         this.descricaoFuncao = descricaoFuncao;
         this.cargaHorariaSemanal = cargaHorariaSemanal;
     }
-
+    
     public int getNumMatricula() {
         return numMatricula;
     }
