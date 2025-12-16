@@ -4,444 +4,543 @@
  */
 package controller;
 
-// criar um arquivo pra cada operação
 
 import model.Venda;
 import model.Veiculo;
 import model.Funcionario;
 import model.Cliente;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.InputMismatchException;
+import java.sql.*;
 /**
  *
  * @author hiago
  */
 
 public class Concessionaria implements OperacoesConcessionaria{
-    private final List<Cliente> clientes = new ArrayList<>();
-    private final List<Funcionario> funcionarios = new ArrayList<>();
-    private final List<Veiculo> veiculos = new ArrayList<>();
-    private final List<Venda> vendas = new ArrayList<>();
-    private final Scanner input = new Scanner(System.in);
-
-    private int lerInt(String mensagem) {
-        while (true) { 
-            try {
-                System.out.print(mensagem);
-                int numero = input.nextInt();
-                input.nextLine(); 
-                return numero; 
-            }
-            catch (InputMismatchException e) {
-                System.err.println("Exceção: " + e);
-                input.nextLine(); 
-                System.out.println("Entre com valores inteiros");
-            }
-        }
-    }
-
-    private double lerDouble(String mensagem) {
-        while (true) {
-            try {
-                System.out.print(mensagem);
-                double numero = input.nextDouble();
-                input.nextLine();
-                return numero;
-            } 
-            catch (java.util.InputMismatchException e) {
-                System.err.println("Exceção: " + e);
-                input.nextLine(); 
-                System.out.println("Entre com valores flutuantes");
-            }
-        }
-    }
     
     @Override
-    public void cadastrarCliente(String nome, String numTelefone, String emailPessoal, String rg, String cpf){
-        Cliente novoCliente = new Cliente(nome, numTelefone, emailPessoal, rg, cpf);
-        this.clientes.add(novoCliente);
-        System.out.println("Novo cliente salvo na lista: " + novoCliente.getNome());
+    public boolean cadastrarCliente(String nome, String telefone, String email, String rg, String cpf) {
+        String sql = "INSERT INTO cliente(nome, telefone, email, rg, cpf) VALUES(?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) { 
+
+            pstmt.setString(1, nome);
+            pstmt.setString(2, telefone);
+            pstmt.setString(3, email);
+            pstmt.setString(4, rg);
+            pstmt.setString(5, cpf);
+
+            pstmt.executeUpdate(); 
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar: " + e.getMessage());
+            return false;
+        }
     }
     
     @Override
     public Cliente consultarCliente(String cpf) {
-        for (Cliente cliente : clientes) {
-            if (cliente.getCpf().equals(cpf)) {
-                return cliente; 
+        String sql = "SELECT * FROM cliente WHERE cpf = ?"; 
+        Cliente cliente = null;
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, cpf);
+            java.sql.ResultSet rs = pstmt.executeQuery(); 
+
+            if (rs.next()) {
+                cliente = new Cliente(
+                    rs.getString("nome"),
+                    rs.getString("telefone"),
+                    rs.getString("email"),
+                    rs.getString("rg"),
+                    rs.getString("cpf")
+                );
             }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar: " + e.getMessage());
         }
-        return null;
+        return cliente;
     }
     
     @Override
     public void alterarCliente(String novoNome, String novoNumTelefone, String novoEmail, String cpf) {
-        Cliente clienteParaAlterar = this.consultarCliente(cpf); 
+        String sql = "UPDATE cliente SET nome = ?, telefone = ?, email = ? WHERE cpf = ?";
 
-        if (clienteParaAlterar != null) {
-            clienteParaAlterar.setNome(novoNome);
-            clienteParaAlterar.setNumTelefone(novoNumTelefone);
-            clienteParaAlterar.setEmailPessoal(novoEmail);
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, novoNome);
+            pstmt.setString(2, novoNumTelefone);
+            pstmt.setString(3, novoEmail);
+
+            pstmt.setString(4, cpf);
+
+            pstmt.executeUpdate();
+            System.out.println("Cliente alterado com sucesso no Banco de Dados!");
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao alterar cliente: " + e.getMessage());
         }
     }
     
     @Override
     public void removerCliente(String cpf) {
-        Cliente clienteParaRemover = this.consultarCliente(cpf);
+        String sql = "DELETE FROM cliente WHERE cpf = ?";
 
-        if (clienteParaRemover != null) {
-            this.clientes.remove(clienteParaRemover);
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, cpf);
+
+            int linhasAfetadas = pstmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Cliente removido do Banco de Dados.");
+            } else {
+                System.out.println("Nenhum cliente encontrado com esse CPF.");
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao remover cliente: " + e.getMessage());
         }
-    }
+    }   
     
     @Override
     public String getRelatorioClientes() {
         StringBuilder sb = new StringBuilder();
-        sb.append("--- LISTA DE CLIENTES ---\n\n");
-    
-        if (clientes.isEmpty()) {
-            sb.append("Nenhum cliente cadastrado.");
-        } else {
-            for (model.Cliente c : clientes) {
-                sb.append("Nome: ").append(c.getNome()).append("\n");
-                sb.append("CPF:  ").append(c.getCpf()).append("\n");
+        sb.append("--- LISTA DE CLIENTES (DO BANCO DE DADOS) ---\n\n");
+
+        String sql = "SELECT * FROM cliente";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = pstmt.executeQuery()) {
+
+            if (!rs.isBeforeFirst()) { 
+                 sb.append("Nenhum cliente cadastrado.");
+            }
+
+            while (rs.next()) {
+                sb.append("Nome: ").append(rs.getString("nome")).append("\n");
+                sb.append("CPF:  ").append(rs.getString("cpf")).append("\n");
+                sb.append("Email: ").append(rs.getString("email")).append("\n");
+                sb.append("Telefone: ").append(rs.getString("telefone")).append("\n");
+                sb.append("RG: ").append(rs.getString("rg")).append("\n");
                 sb.append("-------------------------\n");
             }
+
+        } catch (java.sql.SQLException e) {
+            sb.append("Erro ao gerar relatório: ").append(e.getMessage());
+            System.out.println("Erro SQL: " + e.getMessage());
         }
+
+        return sb.toString();
+    }
+
+    @Override
+    public boolean cadastrarFuncionario(String nome, int numMatricula, String qualificacao, String descricaoFuncao, int cargaHoraria){
+        String sql = "INSERT INTO funcionario(nome, numMatricula, qualificacao, descricaoFuncao, cargaHorariaSemanal) VALUES(?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) { 
+
+            pstmt.setString(1, nome);
+            pstmt.setInt(2, numMatricula);
+            pstmt.setString(3, qualificacao);
+            pstmt.setString(4, descricaoFuncao);
+            pstmt.setInt(5, cargaHoraria);
+
+            pstmt.executeUpdate(); 
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    @Override
+    public Funcionario consultarFuncionario(int matricula) {
+        String sql = "SELECT * FROM funcionario WHERE numMatricula = ?"; 
+        Funcionario funcionario = null;
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, matricula);
+            java.sql.ResultSet rs = pstmt.executeQuery(); 
+
+            if (rs.next()) {
+                funcionario = new Funcionario(
+                    rs.getString("nome"),
+                    rs.getInt("numMatricula"),
+                    rs.getString("qualificacao"),
+                    rs.getString("descricaoFuncao"),
+                    rs.getInt("cargaHorariaSemanal")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar: " + e.getMessage());
+        }
+        return funcionario;
+    }
+    
+    @Override
+    public void alterarFuncionario(int matricula, String novoNome, String novaQualificacao, String novaDescricao, int novaCargaHorariaSemanal) {
+        String sql = "UPDATE funcionario SET nome = ?, qualificacao = ?, descricaoFuncao = ?, cargaHorariaSemanal = ? WHERE numMatricula = ?";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, novoNome);
+            pstmt.setString(2, novaQualificacao);
+            pstmt.setString(3, novaDescricao);
+            pstmt.setInt(4, novaCargaHorariaSemanal);
+            pstmt.setInt(5, matricula);
+
+            pstmt.executeUpdate();
+            System.out.println("Funcionário alterado com sucesso no Banco de Dados!");
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao alterar funcionário: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void removerFuncionario(int matricula) {
+        String sql = "DELETE FROM funcionario WHERE numMatricula = ?";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, matricula);
+
+            int linhasAfetadas = pstmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Funcionário removido do Banco de Dados.");
+            } else {
+                System.out.println("Nenhum funcionário encontrado com essa matrícula.");
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao remover funcionário: " + e.getMessage());
+        } 
+    }
+    
+    @Override
+    public String getRelatorioFuncionarios() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- LISTA DE FUNCIONÁRIOS (DO BANCO DE DADOS) ---\n\n");
+
+        String sql = "SELECT * FROM funcionario";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = pstmt.executeQuery()) {
+
+            if (!rs.isBeforeFirst()) { 
+                 sb.append("Nenhum funcionário cadastrado.");
+            }
+
+            while (rs.next()) {
+                sb.append("Nome: ").append(rs.getString("nome")).append("\n");
+                sb.append("Matrícula:  ").append(rs.getInt("numMatricula")).append("\n");
+                sb.append("Qualificação: ").append(rs.getString("qualificacao")).append("\n");
+                sb.append("Descrição da Função: ").append(rs.getString("descricaoFuncao")).append("\n");
+                sb.append("Carga Horária Semanal: ").append(rs.getInt("cargaHorariaSemanal")).append("\n");
+                sb.append("-------------------------\n");
+            }
+
+        } catch (java.sql.SQLException e) {
+            sb.append("Erro ao gerar relatório: ").append(e.getMessage());
+            System.out.println("Erro SQL: " + e.getMessage());
+        }
+
         return sb.toString();
     }
     
     @Override
-    public void cadastrarFuncionario(){
-        System.out.print("Digite o nome do funcionario: ");
-        String nome = input.nextLine();
-        
-        int numMatricula = lerInt("Digite o número de matrícula do funcionario: ");
-        
-        System.out.print("Digite a qualificação do funcionario: ");
-        String qualificacao = input.nextLine();
-        
-        System.out.print("Digite a descrição da função do funcionario: ");
-        String descricaoFuncao = input.nextLine();
-        
-        int cargaHorariaSemanal = lerInt("Digite a carga horária semanal do funcionario: ");
-        
-        Funcionario novoFuncionario = new Funcionario(nome, numMatricula, qualificacao, descricaoFuncao, cargaHorariaSemanal);
-        this.funcionarios.add(novoFuncionario);
-        
-        System.out.println("Funcionário cadastrado com sucesso!");
+    public boolean cadastrarVeiculo(String nomeVeiculo, String corVeiculo, int numMarchaVeiculo, int numPortaVeiculo, String marcaVeiculo, String anoFabricacaoVeiculo){
+        String sql = "INSERT INTO veiculo(nome, cor, numMarcha, numPortas, marca, anoFabricacao) VALUES(?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) { 
+            
+            pstmt.setString(1, nomeVeiculo);
+            pstmt.setString(2, corVeiculo);
+            pstmt.setInt(3, numMarchaVeiculo);
+            pstmt.setInt(4, numPortaVeiculo);
+            pstmt.setString(5, marcaVeiculo);
+            pstmt.setString(6, anoFabricacaoVeiculo);
+
+            pstmt.executeUpdate(); 
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar: " + e.getMessage());
+            return false;
+        }
     }
     
     @Override
-    public Funcionario consultarFuncionario(){
-            if (!funcionarios.isEmpty()){
-            System.out.println("\n--- Lista de Funcionários Cadastrados ---");
-            for (int i = 0; i < funcionarios.size(); i++) {
-                System.out.println((i + 1) + " - " + funcionarios.get(i).getNome());
-            }
-            System.out.println("-------------------------------------");
+    public Veiculo consultarVeiculo(int id) {
+        String sql = "SELECT * FROM veiculo WHERE id = ?"; 
+        Veiculo veiculo = null;
 
-            int escolha = lerInt("Digite o número do Funcionário: ");
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            if (escolha > 0 && escolha <= funcionarios.size()) {
-                Funcionario funcionarioEscolhido = funcionarios.get(escolha - 1);
-                funcionarioEscolhido.exibeFuncionario();
-                return funcionarioEscolhido;
-            } 
-            else {
-                System.out.println("Opção inválida!");
-                return null;
+            pstmt.setInt(1, id);
+            java.sql.ResultSet rs = pstmt.executeQuery(); 
+
+            if (rs.next()) {
+                veiculo = new Veiculo(
+                    rs.getInt("id"),
+                    rs.getString("nome"),
+                    rs.getString("cor"),
+                    rs.getInt("numMarcha"),
+                    rs.getInt("numPortas"),
+                    rs.getString("marca"),
+                    rs.getString("anoFabricacao")
+                );
             }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar: " + e.getMessage());
         }
-        else {
-                System.out.println("Opção inválida!");
-                return null;
-            }
-    }   
+        return veiculo;
+    }
     
     @Override
-    public void alterarFuncionario(){
-        Funcionario funcionarioParaAlterar = consultarFuncionario();
-        if (funcionarioParaAlterar != null) {
-            System.out.print("Digite o novo nome do funcionario: ");
-            String novoNome = input.nextLine();
-            
-            int novoNumMatricula = lerInt("Digite o novo número da matrícula do funcionario: ");
-            
-            System.out.print("Digite a nova qualificação do funcionario: ");
-            String novaQualificacao = input.nextLine();
-            
-            System.out.print("Digite o novo descrição da função do funcionario: ");
-            String novaDescricao = input.nextLine();
-           
-            int novaCarga = lerInt("Digite a nova carga horária semanal do funcionario: ");
-            
-            funcionarioParaAlterar.setNome(novoNome);
-            funcionarioParaAlterar.setNumMatricula(novoNumMatricula);
-            funcionarioParaAlterar.setQualificacao(novaQualificacao);
-            funcionarioParaAlterar.setDescricaoFuncao(novaDescricao);
-            funcionarioParaAlterar.setCargaHorariaSemanal(novaCarga); 
+    public void alterarVeiculo(int id, String novoNome, String novaCor, int novaNumMarchas, int novoNumPortas, String novaMarca, String novoAnoFabricacao) {
+        String sql = "UPDATE veiculo SET nome = ?, cor = ?, numMarcha = ?, numPortas = ?, marca = ?, anoFabricacao = ? WHERE id = ?";
 
-            System.out.println("\nFuncionário alterado com sucesso!");
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            funcionarioParaAlterar.exibeFuncionario();
+            pstmt.setString(1, novoNome);
+            pstmt.setString(2, novaCor);
+            pstmt.setInt(3, novaNumMarchas);
+            pstmt.setInt(4, novoNumPortas); 
+            pstmt.setString(5, novaMarca);
+            pstmt.setString(6, novoAnoFabricacao);
+
+            pstmt.setInt(7, id);
+
+            int linhasAfetadas = pstmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Veículo alterado com sucesso no Banco de Dados!");
+            } else {
+                System.out.println("Erro: Veículo não encontrado para alteração.");
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao alterar veículo: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void removerVeiculo(int id) {
+        String sql = "DELETE FROM veiculo WHERE id = ?";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+
+            int linhasAfetadas = pstmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Veículo removido do Banco de Dados.");
+            } else {
+                System.out.println("Nenhum veículo encontrado com esse id.");
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao remover veículo: " + e.getMessage());
         } 
-        else {
-        System.out.println("Operação de alteração cancelada.");
-        }
     }
     
     @Override
-    public void removerFuncionario(){
-        Funcionario funcionarioRemove = consultarFuncionario();
-        if (funcionarioRemove != null) {
-            funcionarios.remove(funcionarioRemove);
-            System.out.println("Funcionário removido com sucesso!");
-        }
-        else{
-            System.out.println("Operação de remoção cancelada");
-        }
-    }
-    
-    @Override
-     public void relatorioFuncionarios() {
-        System.out.println("\n--- Relatório Completo de Funcionários ---");
-        if (funcionarios.isEmpty()) {
-            System.out.println("Nenhum funcionário cadastrado.");
-            return;
-        }
-        for (Funcionario funcionario : funcionarios) {
-            funcionario.exibeFuncionario();
-            System.out.println(); 
-        }
-    }
-    
-    @Override
-    public void cadastrarVeiculo(){
-        System.out.print("Digite o nome do veículo: ");
-        String nome = input.nextLine();
-        
-        System.out.print("Digite a cor do veículo: ");
-        String cor = input.nextLine();
-        
-        int numMarchas = lerInt("Digite o número de marchas do veículo: ");
-        
-        int numPortas = lerInt("Digite o número de portas do veículo: ");
-        
-        System.out.print("Digite a marca do veículo: ");
-        String marca = input.nextLine();
-        
-        System.out.println("Digite o ano de fabricaçaõ do veículo: ");
-        String anoFabricacao = input.nextLine();
-        
-        Veiculo novoVeiculo = new Veiculo(nome, cor, numMarchas, numPortas, marca, anoFabricacao);
-        this.veiculos.add(novoVeiculo);
-        
-        System.out.println("Veiculo cadastrado com sucesso!");
-    }
-    
-    @Override
-    public Veiculo consultarVeiculo(){
-            if (!veiculos.isEmpty()){
-            System.out.println("\n--- Lista de Veiculos Cadastrados ---");
-            for (int i = 0; i < veiculos.size(); i++) {
-                System.out.println((i + 1) + " - " + veiculos.get(i).getNome());
+    public String getRelatorioVeiculos() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- LISTA DE VEÍCULOS (DO BANCO DE DADOS) ---\n\n");
+
+        String sql = "SELECT * FROM veiculo";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = pstmt.executeQuery()) {
+
+            if (!rs.isBeforeFirst()) { 
+                 sb.append("Nenhum veículo cadastrado.");
             }
-            System.out.println("-------------------------------------");
 
-            int escolha = lerInt("Digite o número do veículo: ");
-
-            if (escolha > 0 && escolha <= veiculos.size()) {
-                Veiculo veiculoEscolhido = veiculos.get(escolha - 1);
-                veiculoEscolhido.exibeVeiculo();
-                return veiculoEscolhido;
-            } 
-            else {
-                System.out.println("Opção inválida!");
-                return null;
+            while (rs.next()) {
+                sb.append("id: ").append(rs.getInt("id")).append("\n");
+                sb.append("Nome:  ").append(rs.getString("nome")).append("\n");
+                sb.append("Cor: ").append(rs.getString("cor")).append("\n");
+                sb.append("Número de marchas: ").append(rs.getInt("numMarcha")).append("\n");
+                sb.append("Número de portas: ").append(rs.getInt("numPortas")).append("\n");
+                sb.append("Marca: ").append(rs.getString("marca")).append("\n");
+                sb.append("Ano de Fabricação: ").append(rs.getString("anoFabricacao")).append("\n");
+                sb.append("-------------------------\n");
             }
+
+        } catch (java.sql.SQLException e) {
+            sb.append("Erro ao gerar relatório: ").append(e.getMessage());
+            System.out.println("Erro SQL: " + e.getMessage());
         }
-        else{
-                System.out.println("Opção inválida!");
-                return null;
+
+        return sb.toString();
+    }
+    
+    @Override
+    public boolean cadastrarVenda(String data, double valor, Cliente cliente, Funcionario funcionario, Veiculo veiculo){
+        String sql = "INSERT INTO venda(data, valor, cliente, funcionario, veiculo) VALUES(?, ?, ?, ?, ?)";
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) { 
+
+            pstmt.setString(1, data);
+            pstmt.setDouble(2, valor);
+            pstmt.setString(3, cliente.getCpf());
+            pstmt.setInt(4, funcionario.getNumMatricula());
+            pstmt.setInt(5, veiculo.getId());
+
+            pstmt.executeUpdate(); 
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    @Override
+    public Venda consultarVenda(int id) {
+        String sql = "SELECT * FROM venda WHERE id = ?"; 
+        Venda venda = null;
+
+        try (Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            java.sql.ResultSet rs = pstmt.executeQuery(); 
+
+            if (rs.next()) {
+                
+                String data = rs.getString("data");
+                double valor = rs.getDouble("valor");
+                
+                String cpfCliente = rs.getString("cliente");
+                int matriculaFunc = rs.getInt("funcionario");
+                int idVeiculo = rs.getInt("veiculo");
+                
+                Cliente objCliente = this.consultarCliente(cpfCliente);
+                Funcionario objFunc = this.consultarFuncionario(matriculaFunc);
+                Veiculo objVeiculo = this.consultarVeiculo(idVeiculo);
+                
+                if (objCliente != null && objFunc != null && objVeiculo != null) {
+                venda = new Venda(id, data, valor, objCliente, objFunc, objVeiculo);
+                }
             }
+        } catch (SQLException e) {
+            System.out.println("Erro ao buscar: " + e.getMessage());
+        }
+        return venda;
     }
-    
-    @Override
-    public void alterarVeiculo(){
-        Veiculo veiculoParaAlterar = consultarVeiculo();
-        if (veiculoParaAlterar != null) {
-            System.out.print("Digite o novo nome do veículo: ");
-            String novoNome = input.nextLine();
-            
-            System.out.print("Digite a nova cor do veículo: ");
-            String novaCor = input.nextLine();
 
-            int novoNumMarchas = lerInt("Digite o novo número de marchas do veículo: ");
-            
-            int novoNumPortas = lerInt("Digite o novo número de portas do veículo: ");
-            
-            System.out.print("Digite a nova marca do veículo: ");
-            String novaMarca = input.nextLine();
-           
-            System.out.print("Digite o novo ano de fabricação do veículo: ");
-            String novoAno = input.nextLine();
-            
-            veiculoParaAlterar.setNome(novoNome);
-            veiculoParaAlterar.setCor(novaCor);
-            veiculoParaAlterar.setNumMarchas(novoNumMarchas);
-            veiculoParaAlterar.setNumPortas(novoNumPortas);
-            veiculoParaAlterar.setMarca(novaMarca);
-            veiculoParaAlterar.setAnoFabricacao(novoAno);
+    @Override
+    public void alterarVenda(int id, String novaData, double novoValor, Cliente novoCliente, Funcionario novoFuncionario, Veiculo novoVeiculo) {
+        String sql = "UPDATE venda SET data = ?, valor = ?, cliente = ?, funcionario = ?, veiculo = ? WHERE id = ?";
 
-            System.out.println("\nVeiculo alterado com sucesso!");
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            veiculoParaAlterar.exibeVeiculo();
-    } else {
-        System.out.println("Operação de alteração cancelada.");
+            pstmt.setString(1, novaData);
+            pstmt.setDouble(2, novoValor);
+            pstmt.setString(3, novoCliente.getCpf());
+            pstmt.setInt(4, novoFuncionario.getNumMatricula());
+            pstmt.setInt(5, novoVeiculo.getId());
+            pstmt.setInt(6, id);
+
+            pstmt.executeUpdate();
+            System.out.println("Venda alterada com sucesso no Banco de Dados!");
+
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao alterar venda: " + e.getMessage());
+        }
     }
-    }
-    
+
     @Override
-    public void removerVeiculo(){
-        Veiculo veiculoRemove = consultarVeiculo();
-        if (veiculoRemove != null) {
-            veiculos.remove(veiculoRemove);
-            System.out.println("Veiculo removido com sucesso!");
-        }
-        else{
-            System.out.println("Operação de remoção cancelada");
-        }
-    }
-    
-    @Override
-     public void relatorioVeiculos() {
-        System.out.println("\n--- Relatório Completo de Veículos ---");
-        if (veiculos.isEmpty()) {
-            System.out.println("Nenhum veículo cadastrado.");
-            return;
-        }
-        for (Veiculo veiculo : veiculos) {
-            veiculo.exibeVeiculo();
-            System.out.println(); 
-        }
-    }
-    
-    @Override
-    public void cadastrarVenda(){
-        if (!clientes.isEmpty() && !funcionarios.isEmpty() && !veiculos.isEmpty()){
-            System.out.print("Digite a data da venda: ");
-            String data = input.nextLine();
-  
-            double valor = lerDouble("Digite o valor da venda: ");
-     
-            System.out.print("Cliente da venda: ");
-            //Cliente cliente = consultarCliente();
-            
-            System.out.print("O funcionario da venda: ");
-            Funcionario funcionario = consultarFuncionario();
-            
-            System.out.println("O veículo da venda: ");
-            Veiculo veiculo = consultarVeiculo();
-            
-            //Venda novaVenda = new Venda(data, valor, cliente, funcionario, veiculo);
-            //this.vendas.add(novaVenda);
-            
-            System.out.println("Veiculo cadastrado com sucesso!");
-        }
-        else{
-            System.out.println("Você não pode cadastrar uma venda! Verifique se há cliente, funcionário e veículos cadastrados.");
-        }
-    }
-    
-    @Override
-    public Venda consultarVenda(){
-        if (!vendas.isEmpty()){
-            System.out.println("\n--- Lista de Vendas Cadastradas ---");
-            for (int i = 0; i < vendas.size(); i++) {
-                System.out.println((i + 1) + " - " + vendas.get(i).getVeiculo().getNome());
+    public void removerVenda(int id) {
+        String sql = "DELETE FROM venda WHERE id = ?";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+
+            int linhasAfetadas = pstmt.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Venda removida do Banco de Dados.");
+            } else {
+                System.out.println("Nenhuma venda encontrada com esse id.");
             }
-            System.out.println("-------------------------------------");
 
-            int escolha = lerInt("Digite o número do venda: ");
+        } catch (java.sql.SQLException e) {
+            System.out.println("Erro ao remover venda: " + e.getMessage());
+        } 
+    }
+    
+    @Override
+    public String getRelatorioVendas() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- LISTA DE VENDAS (DO BANCO DE DADOS) ---\n\n");
 
-            if (escolha > 0 && escolha <= vendas.size()) {
-                Venda vendaEscolhida = vendas.get(escolha - 1);
-                vendaEscolhida.exibeVenda();
-                return vendaEscolhida;
-            } 
-            else {
-                System.out.println("Opção inválida!");
-                return null;
+        String sql = "SELECT * FROM venda";
+
+        try (java.sql.Connection conn = ConexaoBD.conectar();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = pstmt.executeQuery()) {
+
+            if (!rs.isBeforeFirst()) { 
+                 sb.append("Nenhuma venda cadastrada.");
             }
-        }
-        else {
-                System.out.println("Opção inválida!");
-                return null;
+
+            while (rs.next()) {
+                sb.append("ID Venda: ").append(rs.getInt("id")).append("\n");
+                sb.append("Data:     ").append(rs.getString("data")).append("\n");
+                sb.append("Valor:R$ ").append(rs.getDouble("valor")).append("\n");
+
+               
+                String cpfDoCliente = rs.getString("cliente"); 
+                int matriculaFunc = rs.getInt("funcionario");
+                int idVeiculo = rs.getInt("veiculo");
+
+                Cliente c = consultarCliente(cpfDoCliente);
+                Funcionario f = consultarFuncionario(matriculaFunc);
+                Veiculo v = consultarVeiculo(idVeiculo);
+
+                if (c != null) sb.append("Cliente:  ").append(c.getNome()).append("\n");
+                else sb.append("Cliente:  [Não encontrado - CPF: ").append(cpfDoCliente).append("]\n");
+
+                if (f != null) sb.append("Func.:    ").append(f.getNome()).append("\n");
+                if (v != null) sb.append("Veículo:  ").append(v.getNome()).append("\n");
+
+                sb.append("-------------------------\n");
             }
-    }    
-   
-    @Override
-    public void alterarVenda(){
-        Venda vendaParaAlterar = consultarVenda();
-        if (vendaParaAlterar != null) {
-            System.out.print("Digite a nova data da venda: ");
-            String novaData = input.nextLine();
-            
-            double novoValor = lerDouble("Digite o novo valor da venda: ");
-            
-            System.out.print("Altere o cliente da venda: ");
-            //Cliente novoCliente = consultarCliente();
-           
-            System.out.print("Altere o funcionario da venda: ");
-            Funcionario novoFuncionario = consultarFuncionario();
-            
-            System.out.println("Altere o veículo da venda: ");
-            Veiculo novoVeiculo = consultarVeiculo();
-            
-            vendaParaAlterar.setData(novaData);
-            vendaParaAlterar.setValor(novoValor);
-           // vendaParaAlterar.setCliente(novoCliente);
-            vendaParaAlterar.setFuncionario(novoFuncionario);
-            vendaParaAlterar.setVeiculo(novoVeiculo);
 
-            System.out.println("Venda alterada com sucesso!");
-
-            vendaParaAlterar.exibeVenda();
-            } 
-            else {
-            System.out.println("Operação de alteração cancelada.");
+        } catch (java.sql.SQLException e) {
+            sb.append("Erro: ").append(e.getMessage());
+            System.out.println("Erro SQL: " + e.getMessage());
         }
+        return sb.toString();
     }
-    
-    /**
-     *
-     */
-    @Override
-    public void removerVenda(){
-        Venda vendaRemove = consultarVenda();
-        if (vendaRemove != null) {
-            vendas.remove(vendaRemove);
-            System.out.println("Venda removida com sucesso!");
-        }
-        else{
-            System.out.println("Operação de remoção cancelada");
-        }
-    }
-    
-    @Override
-     public void relatorioVendas() {
-        System.out.println("\n--- Relatório Completo de Vendas ---");
-        if (vendas.isEmpty()) {
-            System.out.println("Nenhuma venda cadastrada.");
-            return;
-        }
-        for (Venda venda : vendas) {
-            venda.exibeVenda(); 
-            System.out.println(); 
-        }
-    }
-    
 }
-            

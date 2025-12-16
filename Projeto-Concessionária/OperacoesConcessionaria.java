@@ -15,28 +15,28 @@ import model.Cliente;
  */
 interface OperacoesConcessionaria{
     
-    void cadastrarCliente(String nome, String numTelefone, String emailPessoal, String rg, String cpf);
+    boolean cadastrarCliente(String nome, String numTelefone, String emailPessoal, String rg, String cpf);
     Cliente consultarCliente(String cpf);
     void alterarCliente(String novoNome, String novoNumTelefone, String novoEmail, String cpf);
     void removerCliente(String cpf);
     String getRelatorioClientes();
     
-    void cadastrarFuncionario();
-    Funcionario consultarFuncionario();
-    void alterarFuncionario();
-    void removerFuncionario();
-    void relatorioFuncionarios();
+    boolean cadastrarFuncionario(String nome, int matricula, String qualificacao, String descricao, int cargaHorariaSemanal);
+    Funcionario consultarFuncionario(int matricula);
+    void alterarFuncionario(int matricula, String novoNome, String novaQualificacao, String novaDescricao, int novaCargaHorariaSemanal);
+    void removerFuncionario(int matricula);
+    String getRelatorioFuncionarios();
     
-    void cadastrarVeiculo();
-    Veiculo consultarVeiculo();
-    void alterarVeiculo();
-    void removerVeiculo();
-    void relatorioVeiculos();
+    boolean cadastrarVeiculo(String nomeVeiculo, String corVeiculo, int numMarchaVeiculo, int numPortaVeiculo, String marcaVeiculo, String anoFabricacaoVeiculo);
+    Veiculo consultarVeiculo(int id);
+    void alterarVeiculo(int id, String novoNome, String novaCor, int novaNumMarchas, int novoNumPortas, String novaMarca, String novoAnoFabricacao);
+    void removerVeiculo(int id);
+    String getRelatorioVeiculos();
     
-    void cadastrarVenda();
-    Venda consultarVenda();
-    void alterarVenda();
-    void removerVenda();
-    void relatorioVendas();
+    boolean cadastrarVenda(String data, double valor, Cliente cliente, Funcionario funcionario, Veiculo veiculo);
+    Venda consultarVenda(int id);
+    void alterarVenda(int id, String novaData, double novoValor, Cliente novoCliente, Funcionario novoFuncionario, Veiculo novoVeiculo);
+    void removerVenda(int id);
+    String getRelatorioVendas();
     
 }
