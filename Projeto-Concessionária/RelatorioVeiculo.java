@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package view.Cliente;
+package view.Veiculo;
 
 import controller.Concessionaria;
 import javax.swing.JFrame;
@@ -13,35 +13,30 @@ import view.MenuPrincipal;
  *
  * @author hiago
  */
-public class RelatorioCliente extends javax.swing.JFrame {
+public class RelatorioVeiculo extends javax.swing.JFrame {
 
     private final Concessionaria controller;
     private MenuPrincipal menuPrincipal;
     
     /**
-     * Creates new form RelatorioCliente
+     * Creates new form RelatorioVeiculo
      */
-    public RelatorioCliente(Concessionaria controller, MenuPrincipal menuPrincipal) {
+    public RelatorioVeiculo(Concessionaria controller, MenuPrincipal menuPrincipal) {
         initComponents();
         setLocationRelativeTo(null);
         
         this.controller = controller;
         this.menuPrincipal = menuPrincipal;
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setTitle("Relatório de Clientes");
+        setTitle("Relatório de Veículos");
         
         gerarRelatorio();
     }
-
+    
     public void setMenuPrincipal(MenuPrincipal menuPrincipal) {
         this.menuPrincipal = menuPrincipal;
     }
-        
-    private void gerarRelatorio() {
-        String textoRelatorio = this.controller.getRelatorioClientes();
-        
-        areaTexto.setText(textoRelatorio);
-    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -52,15 +47,14 @@ public class RelatorioCliente extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        voltar = new javax.swing.JButton();
-        gerar = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        areaTexto = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        areaTexto = new javax.swing.JTextArea();
+        gerar = new javax.swing.JButton();
+        voltar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setBackground(new java.awt.Color(18, 18, 18));
-        setPreferredSize(new java.awt.Dimension(616, 438));
+        setPreferredSize(new java.awt.Dimension(626, 438));
         setResizable(false);
         getContentPane().setLayout(null);
 
@@ -68,17 +62,22 @@ public class RelatorioCliente extends javax.swing.JFrame {
         jPanel1.setPreferredSize(new java.awt.Dimension(600, 400));
         jPanel1.setLayout(null);
 
-        voltar.setBackground(new java.awt.Color(45, 60, 80));
-        voltar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        voltar.setForeground(new java.awt.Color(255, 255, 255));
-        voltar.setText("Voltar");
-        voltar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                voltarActionPerformed(evt);
-            }
-        });
-        jPanel1.add(voltar);
-        voltar.setBounds(70, 340, 72, 30);
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 48)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(233, 236, 239));
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Relatório de Veículos");
+        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jPanel1.add(jLabel1);
+        jLabel1.setBounds(0, 10, 600, 56);
+
+        areaTexto.setBackground(new java.awt.Color(30, 30, 30));
+        areaTexto.setColumns(20);
+        areaTexto.setForeground(new java.awt.Color(255, 255, 255));
+        areaTexto.setRows(5);
+        jScrollPane1.setViewportView(areaTexto);
+
+        jPanel1.add(jScrollPane1);
+        jScrollPane1.setBounds(60, 88, 480, 250);
 
         gerar.setBackground(new java.awt.Color(0, 168, 89));
         gerar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -90,31 +89,19 @@ public class RelatorioCliente extends javax.swing.JFrame {
             }
         });
         jPanel1.add(gerar);
-        gerar.setBounds(150, 340, 120, 30);
+        gerar.setBounds(140, 350, 120, 30);
 
-        jScrollPane2.setBackground(new java.awt.Color(153, 51, 0));
-
-        areaTexto.setEditable(false);
-        areaTexto.setBackground(new java.awt.Color(30, 30, 30));
-        areaTexto.setColumns(20);
-        areaTexto.setForeground(new java.awt.Color(255, 255, 255));
-        areaTexto.setRows(5);
-        areaTexto.setBorder(null);
-        areaTexto.setCaretColor(new java.awt.Color(77, 121, 255));
-        areaTexto.setDisabledTextColor(new java.awt.Color(77, 121, 255));
-        areaTexto.setSelectionColor(new java.awt.Color(77, 121, 255));
-        jScrollPane2.setViewportView(areaTexto);
-
-        jPanel1.add(jScrollPane2);
-        jScrollPane2.setBounds(70, 90, 460, 240);
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 48)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(233, 236, 239));
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Relatório de Clientes");
-        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jPanel1.add(jLabel1);
-        jLabel1.setBounds(0, 10, 600, 50);
+        voltar.setBackground(new java.awt.Color(45, 60, 80));
+        voltar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        voltar.setForeground(new java.awt.Color(255, 255, 255));
+        voltar.setText("Voltar");
+        voltar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                voltarActionPerformed(evt);
+            }
+        });
+        jPanel1.add(voltar);
+        voltar.setBounds(60, 350, 72, 30);
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 600, 400);
@@ -122,12 +109,14 @@ public class RelatorioCliente extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void gerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerarActionPerformed
-        // TODO add your handling code here:
-        gerarRelatorio();
-    }//GEN-LAST:event_gerarActionPerformed
-
+    private void gerarRelatorio() {
+        String textoRelatorio = this.controller.getRelatorioVeiculos();
+        
+        areaTexto.setText(textoRelatorio);
+    }
+    
     private void voltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarActionPerformed
+        // TODO add your handling code here:
         if (menuPrincipal != null) {
             menuPrincipal.setVisible(true);
             this.setVisible(false);
@@ -136,16 +125,20 @@ public class RelatorioCliente extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_voltarActionPerformed
 
+    private void gerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerarActionPerformed
+        // TODO add your handling code here:
+        gerarRelatorio();
+    }//GEN-LAST:event_gerarActionPerformed
+
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea areaTexto;
     private javax.swing.JButton gerar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton voltar;
     // End of variables declaration//GEN-END:variables
 }

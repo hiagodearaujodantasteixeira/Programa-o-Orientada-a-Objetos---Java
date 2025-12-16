@@ -8,11 +8,16 @@ import view.Venda.RelatorioVenda;
 import view.Venda.FormularioVenda;
 import view.Veiculo.FormularioVeiculo;
 import view.Veiculo.RelatorioVeiculo;
+import view.Funcionario.EditFuncionario;
 import view.Funcionario.RelatorioFuncionario;
 import view.Funcionario.FormularioFuncionario;
 import view.Cliente.RelatorioCliente;
 import view.Cliente.FormularioCliente;
+import view.Cliente.EditCliente;
 import controller.Concessionaria;
+import view.Venda.EditVenda;
+import controller.ConexaoBD;
+import view.Veiculo.EditVeiculo;
 
 /**
  *
@@ -21,12 +26,16 @@ import controller.Concessionaria;
 public class MenuPrincipal extends javax.swing.JFrame {
     
     private final Concessionaria controller;
+    private final EditCliente editCliente;
     private final FormularioCliente formularioCliente;
     private final RelatorioCliente relatorioCliente;
     private final FormularioFuncionario formularioFuncionario;
+    private final EditVeiculo editVeiculo;
+    private final EditFuncionario editFuncionario;
     private final RelatorioFuncionario relatorioFuncionario;
     private final FormularioVeiculo formularioVeiculo;
     private final RelatorioVeiculo relatorioVeiculo;
+    private final EditVenda editVenda;
     private final FormularioVenda formularioVenda;
     private final RelatorioVenda relatorioVenda;
 
@@ -36,15 +45,21 @@ public class MenuPrincipal extends javax.swing.JFrame {
     public MenuPrincipal() {
         initComponents();
         
+        setLocationRelativeTo(null);
+        
         this.controller = new Concessionaria();
-        this.relatorioCliente = new RelatorioCliente(this.controller);
-        this.formularioCliente = new FormularioCliente(this.controller, this.relatorioCliente);
-        this.formularioFuncionario = new FormularioFuncionario(this.controller);
-        this.relatorioFuncionario = new RelatorioFuncionario(this.controller);
-        this.formularioVeiculo = new FormularioVeiculo(this.controller);
-        this.relatorioVeiculo = new RelatorioVeiculo(this.controller);
-        this.formularioVenda = new FormularioVenda(this.controller);
-        this.relatorioVenda = new RelatorioVenda(this.controller);
+        this.relatorioCliente = new RelatorioCliente(this.controller, this);
+        this.editCliente = new EditCliente(this.controller, this.relatorioCliente, this);
+        this.formularioCliente = new FormularioCliente(this.controller, this, this.editCliente);
+        this.relatorioFuncionario = new RelatorioFuncionario(this.controller, this);
+        this.editFuncionario = new EditFuncionario(this.controller, this.relatorioFuncionario, this);
+        this.formularioFuncionario = new FormularioFuncionario(this.controller, this.editFuncionario, this);
+        this.relatorioVeiculo = new RelatorioVeiculo(this.controller, this);
+        this.editVeiculo = new EditVeiculo (this.controller, this.relatorioVeiculo, this);
+        this.formularioVeiculo = new FormularioVeiculo(this.controller, this, this.editVeiculo);
+        this.relatorioVenda = new RelatorioVenda(this.controller, this);
+        this.editVenda = new EditVenda(this.controller, this.relatorioVenda, this);
+        this.formularioVenda = new FormularioVenda(this.controller, this.relatorioVenda, this, this.editVenda);
   
     }
 
@@ -57,99 +72,111 @@ public class MenuPrincipal extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         gerCliente = new javax.swing.JButton();
         gerFuncionario = new javax.swing.JButton();
         gerVeiculo = new javax.swing.JButton();
         gerVendas = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(18, 18, 18));
+        setPreferredSize(new java.awt.Dimension(616, 438));
+        setResizable(false);
+        getContentPane().setLayout(null);
 
-        jLabel1.setFont(new java.awt.Font("SimSun", 1, 18)); // NOI18N
+        jPanel1.setBackground(new java.awt.Color(18, 18, 18));
+        jPanel1.setPreferredSize(new java.awt.Dimension(600, 400));
+        jPanel1.setLayout(null);
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 48)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(233, 236, 239));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Concessionária Dantas");
-        jLabel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)));
+        jLabel1.setText("SCCP Imports™");
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jPanel1.add(jLabel1);
+        jLabel1.setBounds(0, 50, 600, 70);
 
-        gerCliente.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
-        gerCliente.setText("Gerenciar Clientes");
+        gerCliente.setBackground(new java.awt.Color(45, 60, 80));
+        gerCliente.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        gerCliente.setForeground(new java.awt.Color(255, 255, 255));
+        gerCliente.setText("Clientes");
         gerCliente.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gerClienteActionPerformed(evt);
             }
         });
+        jPanel1.add(gerCliente);
+        gerCliente.setBounds(460, 200, 120, 40);
 
-        gerFuncionario.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
-        gerFuncionario.setText("Gerenciar Funcionários");
+        gerFuncionario.setBackground(new java.awt.Color(45, 60, 80));
+        gerFuncionario.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        gerFuncionario.setForeground(new java.awt.Color(255, 255, 255));
+        gerFuncionario.setText("Funcionários");
         gerFuncionario.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gerFuncionarioActionPerformed(evt);
             }
         });
+        jPanel1.add(gerFuncionario);
+        gerFuncionario.setBounds(160, 200, 120, 40);
 
-        gerVeiculo.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
-        gerVeiculo.setText("Gerenciar Veículos");
+        gerVeiculo.setBackground(new java.awt.Color(45, 60, 80));
+        gerVeiculo.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        gerVeiculo.setForeground(new java.awt.Color(255, 255, 255));
+        gerVeiculo.setText("Veículos");
         gerVeiculo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gerVeiculoActionPerformed(evt);
             }
         });
+        jPanel1.add(gerVeiculo);
+        gerVeiculo.setBounds(310, 200, 120, 40);
 
-        gerVendas.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
-        gerVendas.setText("Gerenciar Vendas");
+        gerVendas.setBackground(new java.awt.Color(45, 60, 80));
+        gerVendas.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        gerVendas.setForeground(new java.awt.Color(255, 255, 255));
+        gerVendas.setText("Vendas");
         gerVendas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 gerVendasActionPerformed(evt);
             }
         });
+        jPanel1.add(gerVendas);
+        gerVendas.setBounds(20, 200, 120, 40);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(47, 47, 47)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(gerVendas)
-                    .addComponent(gerVeiculo)
-                    .addComponent(gerFuncionario)
-                    .addComponent(gerCliente)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(51, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(gerCliente)
-                .addGap(18, 18, 18)
-                .addComponent(gerFuncionario)
-                .addGap(18, 18, 18)
-                .addComponent(gerVeiculo)
-                .addGap(18, 18, 18)
-                .addComponent(gerVendas)
-                .addContainerGap(32, Short.MAX_VALUE))
-        );
+        jLabel2.setForeground(new java.awt.Color(233, 236, 239));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("© 2025 Sport Club Cortinas Paulista. Todos os Direitos Reservados.");
+        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jPanel1.add(jLabel2);
+        jLabel2.setBounds(10, 370, 590, 20);
+
+        getContentPane().add(jPanel1);
+        jPanel1.setBounds(0, 0, 600, 400);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void gerClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerClienteActionPerformed
         this.formularioCliente.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_gerClienteActionPerformed
 
     private void gerFuncionarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerFuncionarioActionPerformed
         this.formularioFuncionario.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_gerFuncionarioActionPerformed
 
     private void gerVeiculoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerVeiculoActionPerformed
         this.formularioVeiculo.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_gerVeiculoActionPerformed
 
     private void gerVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gerVendasActionPerformed
         this.formularioVenda.setVisible(true);
+        this.setVisible(false);
     }//GEN-LAST:event_gerVendasActionPerformed
 
     /**
@@ -180,11 +207,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MenuPrincipal().setVisible(true);
-            }
+        ConexaoBD.criarTabelas();
+        
+        java.awt.EventQueue.invokeLater(() -> {
+        new MenuPrincipal().setVisible(true);
         });
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -193,5 +221,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton gerVeiculo;
     private javax.swing.JButton gerVendas;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }

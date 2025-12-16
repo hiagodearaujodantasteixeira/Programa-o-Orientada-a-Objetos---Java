@@ -9,33 +9,30 @@ import model.Cliente;
 import javax.swing.JOptionPane;
 import view.MenuPrincipal;
 
+
 /**
  *
  * @author hiago
  */
-public class FormularioCliente extends javax.swing.JFrame {
+public class EditCliente extends javax.swing.JFrame {
     
     private final Concessionaria controller;
+    private final RelatorioCliente relatorioCliente;
     private MenuPrincipal menuPrincipal;
-    private EditCliente editCliente;
+    
     /**
      * Creates new form FormularioCliente
      */
-    
-    public void setEditCliente(EditCliente editCliente) {
-        initComponents();
-        this.editCliente = editCliente;
-    }
-    
-    public FormularioCliente(Concessionaria controller, MenuPrincipal menuPrincipal, EditCliente editCliente) {
+    public EditCliente(Concessionaria controller, RelatorioCliente relatorioCliente, MenuPrincipal menuPrincipal) {
         initComponents();
         setLocationRelativeTo(null);
         
         this.controller = controller;
-        this.menuPrincipal = menuPrincipal; 
-        this.editCliente = editCliente;
+        this.relatorioCliente = relatorioCliente;
+        this.menuPrincipal = menuPrincipal;
         
-        cadastrar.setEnabled(true); 
+        alterar.setEnabled(false); 
+        remover.setEnabled(false); 
     
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         limparActionPerformed(null);
@@ -56,8 +53,11 @@ public class FormularioCliente extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         voltar = new javax.swing.JButton();
+        relatorio = new javax.swing.JButton();
         limpar = new javax.swing.JButton();
-        cadastrar = new javax.swing.JButton();
+        remover = new javax.swing.JButton();
+        alterar = new javax.swing.JButton();
+        consultar = new javax.swing.JButton();
         cpfCliente = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         rgCliente = new javax.swing.JTextField();
@@ -69,7 +69,6 @@ public class FormularioCliente extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         nomeCliente = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        Gerenciamento = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(616, 438));
@@ -90,7 +89,19 @@ public class FormularioCliente extends javax.swing.JFrame {
             }
         });
         jPanel1.add(voltar);
-        voltar.setBounds(20, 313, 70, 30);
+        voltar.setBounds(20, 353, 90, 30);
+
+        relatorio.setBackground(new java.awt.Color(45, 60, 80));
+        relatorio.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        relatorio.setForeground(new java.awt.Color(255, 255, 255));
+        relatorio.setText("Relatório");
+        relatorio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                relatorioActionPerformed(evt);
+            }
+        });
+        jPanel1.add(relatorio);
+        relatorio.setBounds(120, 353, 90, 30);
 
         limpar.setBackground(new java.awt.Color(255, 153, 0));
         limpar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -102,74 +113,86 @@ public class FormularioCliente extends javax.swing.JFrame {
             }
         });
         jPanel1.add(limpar);
-        limpar.setBounds(200, 350, 80, 30);
+        limpar.setBounds(80, 140, 70, 30);
 
-        cadastrar.setBackground(new java.awt.Color(0, 168, 89));
-        cadastrar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        cadastrar.setForeground(new java.awt.Color(255, 255, 255));
-        cadastrar.setText("Cadastrar ");
-        cadastrar.addActionListener(new java.awt.event.ActionListener() {
+        remover.setBackground(new java.awt.Color(227, 6, 19));
+        remover.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        remover.setForeground(new java.awt.Color(255, 255, 255));
+        remover.setText("Remover");
+        remover.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cadastrarActionPerformed(evt);
+                removerActionPerformed(evt);
             }
         });
-        jPanel1.add(cadastrar);
-        cadastrar.setBounds(290, 350, 120, 30);
+        jPanel1.add(remover);
+        remover.setBounds(320, 290, 90, 30);
+
+        alterar.setBackground(new java.awt.Color(108, 117, 125));
+        alterar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        alterar.setForeground(new java.awt.Color(255, 255, 255));
+        alterar.setText("Alterar");
+        alterar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                alterarActionPerformed(evt);
+            }
+        });
+        jPanel1.add(alterar);
+        alterar.setBounds(420, 290, 72, 30);
+
+        consultar.setBackground(new java.awt.Color(0, 168, 89));
+        consultar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        consultar.setForeground(new java.awt.Color(255, 255, 255));
+        consultar.setText("Consultar");
+        consultar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                consultarActionPerformed(evt);
+            }
+        });
+        jPanel1.add(consultar);
+        consultar.setBounds(160, 140, 90, 30);
         jPanel1.add(cpfCliente);
-        cpfCliente.setBounds(170, 260, 260, 30);
+        cpfCliente.setBounds(80, 100, 170, 30);
 
         jLabel7.setForeground(new java.awt.Color(95, 118, 153));
         jLabel7.setText("CPF");
         jPanel1.add(jLabel7);
-        jLabel7.setBounds(170, 240, 230, 16);
+        jLabel7.setBounds(80, 80, 160, 16);
         jPanel1.add(rgCliente);
-        rgCliente.setBounds(170, 210, 260, 30);
+        rgCliente.setBounds(300, 200, 220, 30);
 
         jLabel6.setForeground(new java.awt.Color(95, 118, 153));
         jLabel6.setText("RG");
         jPanel1.add(jLabel6);
-        jLabel6.setBounds(170, 190, 220, 16);
+        jLabel6.setBounds(300, 180, 140, 16);
         jPanel1.add(emailCliente);
-        emailCliente.setBounds(170, 160, 260, 30);
+        emailCliente.setBounds(300, 150, 220, 30);
 
         jLabel4.setForeground(new java.awt.Color(95, 118, 153));
         jLabel4.setText("Email");
         jPanel1.add(jLabel4);
-        jLabel4.setBounds(170, 140, 220, 16);
+        jLabel4.setBounds(300, 130, 220, 16);
         jPanel1.add(numTelefone);
-        numTelefone.setBounds(170, 310, 260, 30);
+        numTelefone.setBounds(300, 250, 220, 30);
 
         jLabel5.setForeground(new java.awt.Color(95, 118, 153));
         jLabel5.setText("Número de Telefone");
         jPanel1.add(jLabel5);
-        jLabel5.setBounds(170, 290, 220, 16);
+        jLabel5.setBounds(300, 230, 230, 16);
 
         jLabel3.setForeground(new java.awt.Color(95, 118, 153));
         jLabel3.setText("Nome");
         jPanel1.add(jLabel3);
-        jLabel3.setBounds(170, 90, 210, 16);
+        jLabel3.setBounds(300, 80, 200, 16);
         jPanel1.add(nomeCliente);
-        nomeCliente.setBounds(170, 110, 260, 30);
+        nomeCliente.setBounds(300, 100, 220, 30);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 48)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(233, 236, 239));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Cadastro de Cliente");
+        jLabel1.setText("Gerenciar Clientes");
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jPanel1.add(jLabel1);
         jLabel1.setBounds(0, 10, 600, 50);
-
-        Gerenciamento.setBackground(new java.awt.Color(45, 60, 80));
-        Gerenciamento.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        Gerenciamento.setForeground(new java.awt.Color(255, 255, 255));
-        Gerenciamento.setText("Gerenciamento");
-        Gerenciamento.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                GerenciamentoActionPerformed(evt);
-            }
-        });
-        jPanel1.add(Gerenciamento);
-        Gerenciamento.setBounds(20, 350, 120, 30);
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 600, 400);
@@ -177,32 +200,66 @@ public class FormularioCliente extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void cadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cadastrarActionPerformed
+    private void consultarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_consultarActionPerformed
         // TODO add your handling code here:
-        String nome = nomeCliente.getText();
-        String num = numTelefone.getText();
-        String email = emailCliente.getText();
-        String rg = rgCliente.getText();
+        String cpfBusca = cpfCliente.getText(); 
+
+        if (cpfBusca.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Digite um CPF para buscar.");
+            return;
+        }
+
+        Cliente cliente = this.controller.consultarCliente(cpfBusca);
+
+        if (cliente != null) {
+            nomeCliente.setText(cliente.getNome());
+            numTelefone.setText(cliente.getNumTelefone());
+            emailCliente.setText(cliente.getEmailPessoal());
+            rgCliente.setText(cliente.getRg());
+            cpfCliente.setEditable(false); 
+            rgCliente.setEditable(false);
+            
+            alterar.setEnabled(true);  
+            remover.setEnabled(true); 
+            
+        } else {
+            JOptionPane.showMessageDialog(this, "Cliente não encontrado.");
+            limparActionPerformed(evt);
+        }
+    }//GEN-LAST:event_consultarActionPerformed
+
+    private void removerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removerActionPerformed
+        // TODO add your handling code here:
         String cpf = cpfCliente.getText();
         
-        if (cpf.isEmpty() || nome.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Preencha pelo menos Nome e CPF para cadastrar.");
-        } else{
-            boolean sucesso = this.controller.cadastrarCliente(nome, num, email, rg, cpf);
-            if (sucesso) {
-                JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!");
-                limparActionPerformed(evt); 
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro: CPF ou RG já existem no sistema!", "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
+        if (cpf.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Digite o CPF para remover.");
+            return;
             }
-        }
+    
+        this.controller.removerCliente(cpf);
         
-        nomeCliente.setText("");
-        numTelefone.setText("");
-        emailCliente.setText("");
-        rgCliente.setText("");
-        cpfCliente.setText("");
-    }//GEN-LAST:event_cadastrarActionPerformed
+        javax.swing.JOptionPane.showMessageDialog(this, "Cliente removido com sucesso!");
+        limparActionPerformed(evt);  
+    }//GEN-LAST:event_removerActionPerformed
+
+    private void alterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_alterarActionPerformed
+        String cpf = cpfCliente.getText(); 
+        String novoNome = nomeCliente.getText();
+        String novoTelefone = numTelefone.getText();
+        String novoEmail = emailCliente.getText();
+        rgCliente.getText();
+
+        if (cpf.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Consulte um cliente antes de alterar.");
+            return;
+        }
+
+        this.controller.alterarCliente(novoNome, novoTelefone, novoEmail, cpf);
+    
+        javax.swing.JOptionPane.showMessageDialog(this, "Dados atualizados com sucesso!");
+        limparActionPerformed(evt);
+    }//GEN-LAST:event_alterarActionPerformed
 
     private void limparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_limparActionPerformed
         // TODO add your handling code here:
@@ -213,8 +270,10 @@ public class FormularioCliente extends javax.swing.JFrame {
         cpfCliente.setText("");
     
         cpfCliente.setEditable(true);
-          
-       cadastrar.setEnabled(true);  
+        
+       alterar.setEnabled(false);   
+       remover.setEnabled(false);   
+       
     }//GEN-LAST:event_limparActionPerformed
 
     private void voltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarActionPerformed
@@ -227,19 +286,18 @@ public class FormularioCliente extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_voltarActionPerformed
 
-    private void GerenciamentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GerenciamentoActionPerformed
+    private void relatorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_relatorioActionPerformed
         // TODO add your handling code here:
-        editCliente.setVisible(true);
-        this.setVisible(false);
-    }//GEN-LAST:event_GerenciamentoActionPerformed
+        this.relatorioCliente.setVisible(true);
+    }//GEN-LAST:event_relatorioActionPerformed
 
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton Gerenciamento;
-    private javax.swing.JButton cadastrar;
+    private javax.swing.JButton alterar;
+    private javax.swing.JButton consultar;
     private javax.swing.JTextField cpfCliente;
     private javax.swing.JTextField emailCliente;
     private javax.swing.JLabel jLabel1;
@@ -252,6 +310,8 @@ public class FormularioCliente extends javax.swing.JFrame {
     private javax.swing.JButton limpar;
     private javax.swing.JTextField nomeCliente;
     private javax.swing.JTextField numTelefone;
+    private javax.swing.JButton relatorio;
+    private javax.swing.JButton remover;
     private javax.swing.JTextField rgCliente;
     private javax.swing.JButton voltar;
     // End of variables declaration//GEN-END:variables
