@@ -1,4 +1,4 @@
-# 🚗 Concessionária Dantas - Sistema de Gerenciamento
+# 🚗 SCCP Imports- Sistema de Gerenciamento
 
 ## 📖 Descrição
 Este projeto consiste em um sistema completo de gerenciamento para uma concessionária de veículos, desenvolvido em **Java**. 
